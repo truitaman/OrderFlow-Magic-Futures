@@ -18,7 +18,7 @@ It fuses **two powerful engines into one strategy**: the battle-tested Wick Magi
 Shorts are not just "reversed longs". The bot understands that in a Short, you fear supports, and in a Long, you fear resistances. Its DCA engine flawlessly differentiates between *averaging down* (saving a trade) and *scaling up* (adding to a winner), adapting its triggers dynamically.
 
 **📊 Native Exchange Telemetry**  
-No guessed math. It hooks directly into the API of the Exchange (For now Hyperliquid) to extract your exact **Account Margin Usage**, **native ROE**, and **Unrealized PnL** (with funding fees already calculated by the exchange). It mathematically monitors your liquidation risk, keeping your account safe.
+No guessed math. It hooks directly into the API of the Exchange (Hyperliquid / DyDx v4) to extract your **Account Margin Usage**, **native ROE**, and **Unrealized PnL** (with funding fees already calculated by the exchange). It mathematically monitors your liquidation risk, keeping your account safe.
 
 **🔪 Kill Position — USD Hard Stop & Trailing Stop**  
 A last-line-of-defence emergency exit, independent of all other logic. Define a maximum acceptable loss in USD (`KILL_POSITION_LOSS`): if unrealized PnL drops below that threshold, the position is closed immediately at market, regardless of DCA state, trend, or any other gate. Optionally enable a **trailing mode** (`KILL_POSITION_TRAILING`): the bot tracks your peak uPnL and triggers the kill only if the drawdown from that peak exceeds `KILL_POSITION_TRAIL_USD`. This lets a winning trade breathe while still protecting you if it reverses aggressively.
