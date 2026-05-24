@@ -13,16 +13,22 @@ Shorts are not just "reversed longs". The bot understands that in a Short, you f
 **📊 Native Exchange Telemetry**  
 No guessed math. It hooks directly into the exchange API (Hyperliquid / dYdX v4 / Binance Futures / Kraken Futures) to extract your **Account Margin Usage**, **native ROE**, and **Unrealized PnL** with funding fees already calculated by the exchange. It mathematically monitors your liquidation risk, keeping your account safe at all times.
 
-**🔪 Kill Position — USD Hard Stop, Trailing Stop & Take Profit**  
-A last-line-of-defence emergency exit, independent of all other logic. Three modes available:
-- **Hard Stop** — If unrealized PnL drops below a configured USD threshold, the position closes immediately at market regardless of DCA state, trend, or any other gate.
-- **Trailing Stop** — Tracks your peak uPnL. Fires only if the drawdown from that peak exceeds your trail distance in USD. Lets winning trades breathe while protecting against reversals.
-- **Flat Take Profit** — Close immediately when unrealized PnL reaches a fixed USD target. Ideal for small entries where a flat dollar goal makes more sense than a percentage.
+**🔪 Kill Position — USD & ATR Dynamic Stop, Trailing Stop & Take Profit**  
+A last-line-of-defence emergency exit, independent of all other logic. Two modes available:
 
-All three modes are independent and can be combined.
+- **USD Mode (classic)** — Fixed dollar thresholds for stop, trail, and take profit.
+- **ATR Mode (new)** — Thresholds that auto-scale with volatility and position size: `multiplier × ATR × qty`. On a volatile pair the stop is naturally wider; when volatility contracts it tightens automatically. Zero manual tuning per pair.
 
-**💸 Live Funding Rate Intelligence** *(New in v1.2.7)*  
-Perpetual futures charge a periodic funding payment between Long and Short holders. In bull frenzies these rates can hit 200–500% annualized — silently bleeding your margin every hour. Wick Magic now monitors this in real time:
+Three protection layers, all independent and combinable:
+- **Hard Stop** — If unrealized PnL drops below the configured threshold, the position closes immediately at market regardless of DCA state, trend, or any other gate.
+- **Trailing Stop** — Tracks your peak uPnL. Fires only if the drawdown from that peak exceeds your trail distance. Lets winning trades breathe while protecting against reversals.
+- **Flat Take Profit** — Close immediately when unrealized PnL reaches a fixed target. Ideal for small entries where a flat dollar goal makes more sense than a percentage.
+
+**🚨 Circuit Breaker — Daily Loss Protection**  
+Prevents runaway losses in a single trading day. Tracks accumulated realized PnL from all closes and kills. If daily losses exceed a configured percentage of your CAPITAL, **all entries are blocked until UTC midnight**. Exits and trailing continue normally — the bot protects existing positions, it just won't open new ones. Set it and forget it.
+
+**💸 Live Funding Rate Intelligence**  
+Perpetual futures charge a periodic funding payment between Long and Short holders. In bull frenzies these rates can hit 200–500% annualized — silently bleeding your margin every hour. Wick Magic monitors this in real time:
 - Live rate and mark price via WebSocket on all four exchanges
 - Countdown to next settlement with per-exchange precision
 - Cumulative funding paid/received since position open (Hyperliquid and dYdX v4)
@@ -38,6 +44,9 @@ Calculates buying vs selling pressure in real time as a normalized score from -1
 
 **🧬 Self-Calibrating via Genetic Algorithm**  
 The GA evolves buy/sell thresholds against up to 2000 real candles of this pair's history, across 60 candidates and 220 generations. It recalibrates every 4 hours, or instantly if ATR volatility shifts. No manual tuning needed.
+
+**⚡ Volatility Percentile Gate — Smart Entry Filtering**  
+Markets get choppy. When they do, orderflow signals generate more noise — false breakouts, whipsaws, traps. The Volatility Percentile Gate watches the ATR over a rolling window of recent candles and compares it to its own history. If the current ATR is in the top percentile (e.g. above P80), entry thresholds are automatically raised by a configurable multiplier — making the bot demand a stronger signal before risking capital. When volatility cools down, thresholds return to normal instantly. Configurable timeframe (`period`, `long`, `daily`), lookback window, and multiplier. Stacks with Institution Hours scout mode.
 
 **🏗️ Multi-Timeframe S/R Confluence**  
 Entries and rebuys only fire when price is near a validated support or resistance level.
@@ -80,44 +89,58 @@ Each engine can be pointed at the short, long, or daily timeframe — letting yo
 Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, and funding in real-time.
 
 ```text
-🎯 OrderFlow Fut 1.2.7    🌊 OrderFlow (SHORT)
+🌊 OrderFlow Fut 1.2.8    🌊 OrderFlow (LONG)
 ROC (annualized)          999.0%
-🏦 Total Capital          1000.00 USD
-📉 Unrealized P&L         -0.14 USD
+🏦 Total Capital          400.00 USDT
+📉 Unrealized P&L         -0.14 USDT
 📊 PnL (ROE %)            -0.43%
 ⚠️ Margin Usage           5.41%
-💵 Margin available       2346.47 USD
-📦 Position size          0.0091 ETH
+💵 Margin available       346.47 USDT
+📦 Position size          0.15 ZEC
 ------------------------------------------------
-🌊 Signal (SHORT)         🔴 BEARISH
-⚖️ Imbalance              -0.0687
-🟢 Buy threshold          0.0500
-🔴 Sell threshold         -0.0715
-🧬 GA samples             225 / 120 ✓
-📡 Signal Pair            USDT-ETH @ okx
+🌊 Signal (LONG)          🟢 BULLISH
+⚖️ Imbalance              0.0576
+🟢 Buy threshold          0.0576
+🔴 Sell threshold         -0.0500
+🧬 GA samples             700 / 120 ✓
 🪤 Trap guard             CLEAR
-🔬 PTH trades             1000 (27s ago)
-🏗️ S/R gate               ON (±1%)
+🔬 PTH trades             1000 (2s ago)
+🏗️ S/R gate               ON (±0.8%)
 🏗️ S/R zone               0 / 2
 🐋 Absorption             ON
-🏦 Inst. Hours            FULL POWER (UTC 16h)
+⚡ Vol Gate               P45 / 80
 ------------------------------------------------
-📌 Mark Price             2174.35
-💸 Funding Rate           🟢 -0.0028% / 1h
-📊 Cum. Funding           -$0.24 since open
-⏰ Next Funding           45m 12s
+📌 Mark Price             660.50
+💸 Funding Rate           🟢 -0.0028% / 8h
+⏰ Next Funding           3h 45m
+🛡️ Funding Guard          ✅ CLEAR (44% APR)
 ------------------------------------------------
-🌊 Partial SELL           READY
-🔪 Kill Position          Trail: peak $4.20 | dist $50
+🔪 Kill Position          $-2.10 / -$33.0 [ATR]
+🚨 Circuit Breaker        $-5.20 / -$14.0
 🛡️ Liq. Limit (%)         20% (SAFE ✓)
-🪢 Rekt Liq. Price        1985.30 (8.7% dist)
+🪢 Rekt Liq. Price        585.30 (11.4% dist)
 ```
+
+---
+## 🔥 What's New in v1.2.8
+
+### 🔪 Kill Position ATR Mode — Dynamic Stops That Scale With Volatility
+Kill Position now supports two modes: the classic fixed USD thresholds, and a new **ATR mode** where stop, trail, and take profit are calculated as `multiplier × ATR × position_qty`. On a volatile pair like ZEC the stop is naturally wider; on a stable pair like BTC it tightens — all automatic, zero per-pair tuning.
+
+### 🚨 Circuit Breaker — Daily Realized PnL Limit
+New safety net that tracks accumulated realized PnL across all closes and kills during the day. When daily losses exceed a configured percentage of CAPITAL, all entries are blocked until UTC midnight. Prevents cascading kills from wiping out a good week in a single volatile day.
+
+### ⚡ Volatility Percentile Gate — Smart Entry Filtering
+Watches the ATR over a rolling window of candles and ranks it as a percentile. When the current ATR exceeds the configured gate (e.g. P80), entry thresholds are automatically multiplied — demanding a stronger orderflow signal before risking capital. Configurable timeframe (`period` for fast reaction to dumps, `long` for regime filtering, `daily` for macro view), lookback window, and multiplier. Stacks with Institution Hours scout mode.
+
+### 🐛 Cooldown Display Fix
+The chart status cooldown indicator now mirrors the actual entry logic exactly. Previously it could show "blocked cooldown" incorrectly when no position was open and the cooldown had already expired. Now it distinguishes between "rebuy cooldown" (with position) and "re-entry cooldown" (after full close) and checks the correct timer for each.
 
 ---
 ## 🔥 What's New in v1.2.7
 
 ### 💸 Funding Rate Intelligence (All 4 Exchanges)
-The biggest quality-of-life addition to date. Every supported exchange now streams live funding rate data directly into the strategy:
+Every supported exchange now streams live funding rate data directly into the strategy:
 
 | Exchange | Feed | Settlement | Extras |
 |---|---|---|---|
@@ -125,11 +148,12 @@ The biggest quality-of-life addition to date. Every supported exchange now strea
 | dYdX v4 | WebSocket `v4_markets` | 1h | Oracle price, cumulative funding |
 | Binance Futures | REST poll every 30s | 8h | Mark price, next settlement |
 | Kraken Futures | WebSocket `ticker` | 1h | Live rate + next period prediction |
+| BYdFi | WebSocket `ticker` | 1h | Oracle price, Live rate + next period  prediction |
 
 **Funding Rate Guard** — configure a maximum annualized rate (e.g. 300%). When the live rate exceeds it, all entries and DCA are blocked. Exits are never affected. Rates are normalized to APR across all exchanges for a fair comparison regardless of settlement frequency.
 
 ### 🔪 Kill Position Take Profit (USD)
-New third mode for Kill Position: set a flat USD profit target. The moment unrealized PnL hits +$X, the position closes immediately at market — no trailing required, no waiting for an OF signal. Ideal for small position sizes where dollar targets are more intuitive than percentages.
+Third mode for Kill Position: set a flat USD profit target. The moment unrealized PnL hits +$X, the position closes immediately at market — no trailing required, no waiting for an OF signal.
 
 ### 🏁 Kraken Futures — Now Final
 Kraken Futures moves from Beta to **Final** status. The dedicated real-time WebSocket connection for multi-collateral margin reading is fully stable, and funding rate telemetry via the `ticker` feed is confirmed working on all major pairs.
@@ -149,6 +173,7 @@ Kraken Futures moves from Beta to **Final** status. The dedicated real-time WebS
 | **dYdX v4** | ✅ Final | Full OF, live PTH, oracle price, live funding |
 | **Binance Futures** | ✅ Final | Full OF, live PTH, mark price, funding rate (8h) |
 | **Kraken Futures** | ✅ Final | Full OF, live PTH, multi-collateral, funding + prediction |
+| **BidFi | ✅ Final | Full OF, live PTH, oracle price, funding + prediction |
 
 ---
 ## 📖 Full Documentation
@@ -158,8 +183,9 @@ Everything is heavily documented in the Wiki:
 - [Support & Resistance Confluence](https://github.com/truitaman/OrderFlow-Magic/wiki#-3-support--resistance-confluence)
 - [Smart S/R Bias](https://github.com/truitaman/OrderFlow-Magic/wiki#-4-smart-sr-bias-direction-gate)
 - [Trap Detection, Absorption, Institution Hours](https://github.com/truitaman/OrderFlow-Magic/wiki#-5-bull--bear-trap-detection)
+- [Volatility Percentile Gate](https://github.com/truitaman/OrderFlow-Magic/wiki#-volatility-percentile-gate)
+- [Kill Position — USD & ATR Dynamic Stop](https://github.com/truitaman/OrderFlow-Magic/wiki#-9-kill-position--usd-hard-stop--trailing-stop)
 - [Funding Rate Intelligence](https://github.com/truitaman/OrderFlow-Magic/wiki#-11-funding-rate-intelligence-)
-- [Kill Position — USD Hard Stop & Trailing](https://github.com/truitaman/OrderFlow-Magic/wiki#-9-kill-position--usd-hard-stop--trailing-stop)
 - [Compound Profits & Dump Protection](https://github.com/truitaman/OrderFlow-Magic/wiki#-13-futures-margin--compound-profits)
 - [OrderFlow vs Classic Branch](https://github.com/truitaman/OrderFlow-Magic/wiki#-20-orderflow-vs-classic-branch)
 - [Full Settings Reference](https://github.com/truitaman/OrderFlow-Magic/wiki#-17-editor-settings-reference)
@@ -174,6 +200,6 @@ Requires a valid **Gunbot Defi license** to run on Hyperliquid or dYdX v4.
 https://t.me/+pztaQ-2x7ZFmNDc0
 
 No Defi license yet?  
-→ Upgrade from Standard — $190: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
-→ Upgrade from Pro — $100: [Purchase here](https://checkout.gunbot.com/crazymop/promoProToDefi)  
+→ Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
+→ Upgrade from Pro — $70: [Purchase here](https://checkout.gunbot.com/crazymop/promoProToDefi)  
 → New to Gunbot: [gunbot.com](https://checkout.gunbot.com/crazymop/ultimate)
