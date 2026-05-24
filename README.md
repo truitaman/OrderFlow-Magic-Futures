@@ -89,7 +89,7 @@ Each engine can be pointed at the short, long, or daily timeframe — letting yo
 Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, and funding in real-time.
 
 ```text
-🌊 OrderFlow Fut 1.2.8    🌊 OrderFlow (LONG)
+🌊 OrderFlow Fut 1.3.0    🌊 OrderFlow (LONG)
 ROC (annualized)          999.0%
 🏦 Total Capital          400.00 USDT
 📉 Unrealized P&L         -0.14 USDT
@@ -122,7 +122,7 @@ ROC (annualized)          999.0%
 ```
 
 ---
-## 🔥 What's New in v1.2.8
+## 🔥 What's New in v1.3.0
 
 ### 🔪 Kill Position ATR Mode — Dynamic Stops That Scale With Volatility
 Kill Position now supports two modes: the classic fixed USD thresholds, and a new **ATR mode** where stop, trail, and take profit are calculated as `multiplier × ATR × position_qty`. On a volatile pair like ZEC the stop is naturally wider; on a stable pair like BTC it tightens — all automatic, zero per-pair tuning.
