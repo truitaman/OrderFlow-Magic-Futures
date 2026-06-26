@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wick Magic Futures · AutoConfig Manual</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg:        #0b0f17;
+    --surface:   #111827;
+    --surface2:  #1a2233;
+    --border:    #1e2d45;
+    --cyan:      #06b6d4;
+    --cyan-dim:  #0e7490;
+    --green:     #22c55e;
+    --yellow:    #f59e0b;
+    --red:       #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --white:     #f8fafc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── Header ─────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, #060d1a 0%, #0b1628 60%, #091520 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6,182,212,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  h1 span { color: var(--cyan); }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Layout ──────────────────────────────── */
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Section headers ─────────────────────── */
+  .section {
+    margin-top: 56px;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    margin: 24px 0 8px;
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── Callout boxes ───────────────────────── */
+  .callout {
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { flex: 1; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: 14px; }
+  .callout-body p { margin: 0; font-size: 14px; }
+
+  .callout-tip   { background: rgba(6,182,212,0.08);  border: 1px solid rgba(6,182,212,0.25); }
+  .callout-warn  { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+  .callout-danger{ background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); }
+  .callout-tip   .callout-body strong { color: var(--cyan); }
+  .callout-warn  .callout-body strong { color: var(--yellow); }
+  .callout-danger .callout-body strong { color: var(--red); }
+
+  /* ── Code blocks ─────────────────────────── */
+  .code-block {
+    background: #080d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .code-header {
+    background: var(--surface2);
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .code-body { padding: 16px 20px; overflow-x: auto; line-height: 1.8; }
+  .hl-key   { color: #7dd3fc; }
+  .hl-str   { color: #86efac; }
+  .hl-num   { color: #fbbf24; }
+  .hl-bool  { color: #f472b6; }
+  .hl-comment { color: #4b5563; font-style: italic; }
+  .hl-arrow { color: var(--cyan); font-weight: 600; }
+  .hl-change{ background: rgba(6,182,212,0.12); border-radius: 3px; padding: 1px 4px; }
+
+  /* ── Mode cards ──────────────────────────── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .mode-card {
+    border-radius: 10px;
+    padding: 20px 16px;
+    border: 1px solid;
+    text-align: center;
+  }
+  .mode-card.bull   { background: rgba(34,197,94,0.07);  border-color: rgba(34,197,94,0.3); }
+  .mode-card.side   { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.3); }
+  .mode-card.bear   { background: rgba(239,68,68,0.07);  border-color: rgba(239,68,68,0.3); }
+  .mode-emoji { font-size: 28px; margin-bottom: 8px; }
+  .mode-label { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .mode-card.bull  .mode-label { color: var(--green); }
+  .mode-card.side  .mode-label { color: var(--yellow); }
+  .mode-card.bear  .mode-label { color: var(--red); }
+  .mode-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+  .mode-card.bull  .mode-value { background: rgba(34,197,94,0.15);  color: var(--green); }
+  .mode-card.side  .mode-value { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .mode-card.bear  .mode-value { background: rgba(239,68,68,0.15);  color: var(--red); }
+  .mode-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── Settings table ──────────────────────── */
+  .settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .settings-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .settings-table tr:last-child td { border-bottom: none; }
+  .settings-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .param {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #7dd3fc;
+    background: rgba(125,211,252,0.08);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .tag-safe    { color: var(--green);  font-size: 11px; font-weight: 600; }
+  .tag-caution { color: var(--yellow); font-size: 11px; font-weight: 600; }
+  .tag-danger  { color: var(--red);    font-size: 11px; font-weight: 600; }
+
+  /* ── Steps ───────────────────────────────── */
+  .steps { counter-reset: step; margin: 16px 0; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    counter-increment: step;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body strong { color: var(--white); display: block; margin-bottom: 4px; }
+
+  /* ── Do / Don't ──────────────────────────── */
+  .do-dont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .do-block, .dont-block {
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 13px;
+  }
+  .do-block   { background: rgba(34,197,94,0.07);  border: 1px solid rgba(34,197,94,0.2); }
+  .dont-block { background: rgba(239,68,68,0.07);  border: 1px solid rgba(239,68,68,0.2); }
+  .do-block   .label { color: var(--green);  font-weight: 700; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; }
+  .dont-block .label { color: var(--red);    font-weight: 700; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; }
+  .do-block li, .dont-block li { margin-left: 16px; margin-bottom: 4px; color: var(--text); }
+
+  /* ── FAQ ─────────────────────────────────── */
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .faq-q {
+    padding: 14px 18px;
+    background: var(--surface);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .faq-q::before {
+    content: 'Q';
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    background: rgba(6,182,212,0.1);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 3px;
+    padding: 1px 6px;
+    flex-shrink: 0;
+  }
+  .faq-a {
+    padding: 14px 18px;
+    background: var(--bg);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* ── Divider ─────────────────────────────── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0 0;
+  }
+
+  /* ── Footer ──────────────────────────────── */
+  footer {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 24px; }
+    .mode-grid { grid-template-columns: 1fr; }
+    .do-dont { grid-template-columns: 1fr; }
+    header { padding: 32px 20px 28px; }
+    .wrap { padding: 0 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Gunbot · Hyperliquid Perpetuals</div>
+  <h1>Wick Magic <span>Futures</span></h1>
+  <p class="subtitle">AutoConfig setup guide — no technical background needed</p>
+</header>
+
+<div class="wrap">
+
+  <!-- WHAT IS THIS -->
+  <div class="section">
+    <div class="section-label">Overview</div>
+    <h2>What does this do?</h2>
+    <p>The <strong>AutoConfig</strong> is the brain behind your bot. It runs on a schedule and automatically decides which trading pairs to add, which ones to remove, and how aggressively to trade — so you don't have to do anything manually once it's running.</p>
+    <p>Think of it like a hiring manager that constantly scans the market, hires the best workers (active pairs), fires the lazy ones (stale pairs), and adjusts everyone's tasks based on current market conditions.</p>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Set and forget</strong>
+        <p>Once configured, the bot manages everything. You only need to touch this file when market conditions change significantly (bull → bear, etc.).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE ONE THING -->
+  <div class="section">
+    <div class="section-label">Most Important Setting</div>
+    <h2>The one line you need to change</h2>
+
+    <p>There is <strong>one single setting</strong> that controls how the bot behaves across all market conditions. Everything else adapts automatically based on this:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ef4444"></div>
+        <div class="code-dot" style="background:#f59e0b"></div>
+        <div class="code-dot" style="background:#22c55e"></div>
+        autoconfig.json — HL_WM_AddTopVolume → filters → setMode
+      </div>
+      <div class="code-body">
+<span class="hl-key">"setMode"</span>: {<br>
+&nbsp;&nbsp;<span class="hl-key">"type"</span>: <span class="hl-str">"custom"</span>,<br>
+&nbsp;&nbsp;<span class="hl-key">"target"</span>: <span class="hl-str">" (function(d){ global._wmMode=<span class="hl-change">'bear'</span>; return true; })(this)"</span><br>
+}
+      </div>
+    </div>
+
+    <p>Change the word inside the quotes to one of the three modes below:</p>
+
+    <div class="mode-grid">
+      <div class="mode-card bull">
+        <div class="mode-emoji">📈</div>
+        <div class="mode-label">Bull Market</div>
+        <div class="mode-value">'bull'</div>
+        <div class="mode-desc">Prices trending up. Bot hunts pairs with positive momentum. Most selective.</div>
+      </div>
+      <div class="mode-card side">
+        <div class="mode-emoji">➡️</div>
+        <div class="mode-label">Sideways</div>
+        <div class="mode-value">'sideways'</div>
+        <div class="mode-desc">Market going nowhere. Bot looks for volume surges. Balanced settings.</div>
+      </div>
+      <div class="mode-card bear">
+        <div class="mode-emoji">📉</div>
+        <div class="mode-label">Bear Market</div>
+        <div class="mode-value">'bear'</div>
+        <div class="mode-desc">Prices dropping. Bot skips direction filters, trades both ways. Most relaxed.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>How to tell which mode to use</strong>
+        <p>Look at Bitcoin's 24h chart. Clearly going up? → <code style="color:var(--green)">'bull'</code>. Mostly flat with spikes? → <code style="color:var(--yellow)">'sideways'</code>. Down significantly? → <code style="color:var(--red)">'bear'</code>. When unsure, use <code>'sideways'</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- YOUR MONEY SETTINGS -->
+  <div class="section">
+    <div class="section-label">Capital Settings</div>
+    <h2>Your money settings</h2>
+    <p>These are the settings you'll want to personalise to your own account size. They live inside <code style="font-family:monospace;color:var(--cyan)">"overrides"</code> in the <code style="font-family:monospace;color:var(--cyan)">HL_WM_AddTopVolume</code> job.</p>
+
+    <table class="settings-table">
+      <thead>
+        <tr>
+          <th>Setting</th>
+          <th>Default</th>
+          <th>What it means</th>
+          <th>Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="param">CAPITAL</span></td>
+          <td>1000</td>
+          <td>Your total account balance in USD. Used for safety checks — not directly spent per trade.</td>
+          <td><span class="tag-safe">● SAFE</span></td>
+        </tr>
+        <tr>
+          <td><span class="param">TRADING_LIMIT</span></td>
+          <td>50</td>
+          <td>How much USD to put into each trade entry. With 10 pairs, this means up to $500 deployed at once.</td>
+          <td><span class="tag-caution">● CAUTION</span></td>
+        </tr>
+        <tr>
+          <td><span class="param">LEVERAGE</span></td>
+          <td>5</td>
+          <td>Multiplier on your position size. 5× means $50 controls $250 of exposure. Higher = more risk.</td>
+          <td><span class="tag-danger">● HIGH RISK</span></td>
+        </tr>
+        <tr>
+          <td><span class="param">maxPairs</span></td>
+          <td>10</td>
+          <td>Maximum number of pairs the bot will run at once. More pairs = more capital in play.</td>
+          <td><span class="tag-caution">● CAUTION</span></td>
+        </tr>
+        <tr>
+          <td><span class="param">MIN_NOTIONAL</span></td>
+          <td>11</td>
+          <td>Minimum trade size in USD. Hyperliquid requires at least $10 — keep this at 11 or above.</td>
+          <td><span class="tag-safe">● SAFE</span></td>
+        </tr>
+        <tr>
+          <td><span class="param">OF_COMPOUND</span></td>
+          <td>true</td>
+          <td>Automatically reinvests profits into the next trade. Recommended to leave on.</td>
+          <td><span class="tag-safe">● SAFE</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💰</div>
+      <div class="callout-body">
+        <strong>Sizing rule of thumb</strong>
+        <p>Set <code style="font-family:monospace">TRADING_LIMIT</code> so that <code style="font-family:monospace">TRADING_LIMIT × maxPairs × LEVERAGE</code> doesn't exceed 50–60% of your total balance. Example: $50 × 10 pairs × 5× leverage = $2,500 exposure on a $1,000 account is already aggressive.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE THRESHOLDS EXPLAINED -->
+  <div class="section">
+    <div class="section-label">Under The Hood</div>
+    <h2>What changes between modes</h2>
+    <p>You don't need to touch these — they update automatically. But it's useful to understand what the bot becomes more or less strict about in each mode:</p>
+
+    <table class="settings-table">
+      <thead>
+        <tr>
+          <th>What's checked</th>
+          <th style="color:var(--green)">🟢 Bull</th>
+          <th style="color:var(--yellow)">🟡 Sideways</th>
+          <th style="color:var(--red)">🔴 Bear</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Price momentum</strong><br><small style="color:var(--muted)">Must price be rising to add a pair?</small></td>
+          <td style="color:var(--green)">Yes — must be going up</td>
+          <td style="color:var(--yellow)">No — skipped</td>
+          <td style="color:var(--red)">No — skipped</td>
+        </tr>
+        <tr>
+          <td><strong>Volume surge needed</strong><br><small style="color:var(--muted)">Minimum volume spike to qualify</small></td>
+          <td>+20%</td>
+          <td>+12%</td>
+          <td>+8%</td>
+        </tr>
+        <tr>
+          <td><strong>Max pairs considered</strong><br><small style="color:var(--muted)">By 24h volume rank on Hyperliquid</small></td>
+          <td>Top 10</td>
+          <td>Top 10</td>
+          <td>Top 10</td>
+        </tr>
+        <tr>
+          <td><strong>Max spread allowed</strong><br><small style="color:var(--muted)">Bid/ask gap before blocking entries</small></td>
+          <td>0.4%</td>
+          <td>0.5%</td>
+          <td>0.6%</td>
+        </tr>
+        <tr>
+          <td><strong>Minimum ATR to trade</strong><br><small style="color:var(--muted)">ATR = how much a pair moves. Too little = skip.</small></td>
+          <td>0.15%</td>
+          <td>0.10%</td>
+          <td>0.08%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HOW TO EDIT -->
+  <div class="section">
+    <div class="section-label">Step by Step</div>
+    <h2>How to switch market mode</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Open <code style="font-family:monospace">autoconfig.json</code> in any text editor</strong>
+          Notepad, VS Code, or any editor works. Find the file in your Gunbot folder.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Search for the word <code style="font-family:monospace">setMode</code></strong>
+          Use Ctrl+F (Windows) or Cmd+F (Mac) to jump right to it.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Change the market mode word</strong>
+          You'll see <code style="font-family:monospace">'bear'</code>, <code style="font-family:monospace">'sideways'</code>, or <code style="font-family:monospace">'bull'</code> in that line. Replace just that word (keep the single quotes).
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Save the file</strong>
+          Ctrl+S or Cmd+S. Gunbot will pick up the change on its next scheduled run — no restart needed.
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-danger">
+      <div class="callout-icon">🚫</div>
+      <div class="callout-body">
+        <strong>Only change the mode word — nothing else on that line</strong>
+        <p>The line looks complex. You only need to change the one word between single quotes: <code style="font-family:monospace">'bear'</code>, <code style="font-family:monospace">'sideways'</code>, or <code style="font-family:monospace">'bull'</code>. Don't remove the quotes, spaces, or any surrounding characters.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DO AND DONT -->
+  <div class="section">
+    <div class="section-label">Rules</div>
+    <h2>Do's and Don'ts</h2>
+
+    <div class="do-dont">
+      <div class="do-block">
+        <div class="label">✅ SAFE TO CHANGE</div>
+        <ul>
+          <li>Market mode (<code style="font-family:monospace">'bull'</code> / <code style="font-family:monospace">'sideways'</code> / <code style="font-family:monospace">'bear'</code>)</li>
+          <li><code style="font-family:monospace">CAPITAL</code> — your account size</li>
+          <li><code style="font-family:monospace">TRADING_LIMIT</code> — per-trade size</li>
+          <li><code style="font-family:monospace">LEVERAGE</code> — multiplier</li>
+          <li><code style="font-family:monospace">maxPairs</code> — max active pairs</li>
+          <li><code style="font-family:monospace">exclude</code> — pairs to never trade</li>
+        </ul>
+      </div>
+      <div class="dont-block">
+        <div class="label">🚫 DO NOT TOUCH</div>
+        <ul>
+          <li>Any <code style="font-family:monospace">schedule</code> values (timing)</li>
+          <li>Any <code style="font-family:monospace">type</code> values</li>
+          <li>Filter names or filter logic</li>
+          <li><code style="font-family:monospace">FUTURES_EXCHANGE</code> or <code style="font-family:monospace">WM_PRESET</code></li>
+          <li><code style="font-family:monospace">OF_COMPOUND</code> settings</li>
+          <li>The <code style="font-family:monospace">strategy</code> name</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOBS EXPLAINED -->
+  <div class="section">
+    <div class="section-label">The 5 Jobs</div>
+    <h2>What each job does</h2>
+    <p>The AutoConfig has 5 automated jobs. They all run on their own schedules — you don't start or stop them manually.</p>
+
+    <h3>📥 HL_WM_AddTopVolume</h3>
+    <p>Scans Hyperliquid every 5 minutes and adds high-volume, volatile pairs that pass the market-mode filters. This is where your market mode setting lives.</p>
+
+    <h3>⚙️ HL_WM_SetOverrides</h3>
+    <p>Runs every 5 minutes on active pairs. Checks each pair's current spread and volatility, and gates or unblocks trading entries accordingly. Adapts to your market mode automatically.</p>
+
+    <h3>🗑️ HL_WM_RemoveDropped</h3>
+    <p>Removes pairs that have fallen out of the top volume rankings and have no open position. Runs every 10 minutes. Keeps your pair list clean and focused.</p>
+
+    <h3>💤 HL_WM_RemoveStale</h3>
+    <p>Removes pairs that have been sitting idle for 4+ hours with no open position and a dead market. Frees up slots for better opportunities.</p>
+
+    <h3>🖥️ HL_WM_StartGUI</h3>
+    <p>Checks if any active pairs exist and automatically starts the Gunbot GUI if they do. You'll normally never notice this job — it just works in the background.</p>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section">
+    <div class="section-label">Common Questions</div>
+    <h2>FAQ</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">No pairs are being added — what's wrong?</div>
+      <div class="faq-a">First, check your market mode. If the market is bearish and you're in <code>'bull'</code> mode, the filters will block almost everything. Switch to <code>'bear'</code>. Also, the bot needs at least 1 hour of snapshot data (12 snapshots × 5 min) before it can evaluate pairs properly after a first start.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">A pair was added but not trading — why?</div>
+      <div class="faq-a">The <strong>SetOverrides</strong> job may have detected a spread that's too wide or not enough volatility (ATR) on that specific pair right now. This is intentional — the bot waits for better conditions before entering rather than forcing a bad trade.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">The bot keeps removing pairs I want to keep</div>
+      <div class="faq-a">If a pair drops out of the top volume rankings and has no open position, it gets removed. This is by design — the strategy focuses on the most liquid pairs only. If you want a specific pair excluded from removal, add it to the <code>exclude</code> field in the <strong>RemoveDropped</strong> job.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">BTC is excluded — can I add it?</div>
+      <div class="faq-a">BTC (USD-BTC) is excluded by default because its price is very high and it behaves differently to altcoins for this strategy. You can remove it from the <code>exclude</code> field, but it's not recommended unless you have experience with BTC perpetuals.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Do I need to restart Gunbot after changing the mode?</div>
+      <div class="faq-a">No. Gunbot reads <code>autoconfig.json</code> on each scheduled run. Save the file and the next time the <strong>AddTopVolume</strong> job fires (within 5 minutes), it will use the new mode.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I run this on multiple exchanges at the same time?</div>
+      <div class="faq-a">This AutoConfig is configured specifically for Hyperliquid. Do not change the <code>exchange</code> field to another exchange without first consulting your bot administrator, as the pair format and settings differ per exchange.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+</div>
+
+<footer>
+  Wick Magic Futures · AutoConfig v1.3.6 · Hyperliquid Perpetuals<br>
+  <span style="color:#1e2d45;margin-top:6px;display:block">For support, contact your Gunbot administrator</span>
+</footer>
+
+</body>
+</html>
