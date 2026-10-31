@@ -272,7 +272,7 @@ Everything is documented in the Wiki:
 
 ---
 ## 🛍️ Get the Strategy
-Requires a valid **Gunbot Defi license** to run on Hyperliquid or dYdX v4.
+Requires a valid **Gunbot Defi license** to execute.
 
 > 🛒 **[Purchase Wick Magic Here](https://www.gunbot.com/devcommunity/wickmagic-futures)**
 
@@ -280,6 +280,6 @@ Requires a valid **Gunbot Defi license** to run on Hyperliquid or dYdX v4.
 https://t.me/+pztaQ-2x7ZFmNDc0
 
 No Defi license yet?  
-→ Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
+→ Upgrade from Standard — $185: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
 → Upgrade from Pro — $70: [Purchase here](https://checkout.gunbot.com/crazymop/promoProToDefi)  
 → New to Gunbot: [gunbot.com](https://checkout.gunbot.com/crazymop/ultimate)
