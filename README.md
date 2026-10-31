@@ -1,72 +1,118 @@
 # 🚀 Wick Magic Futures
 ### *The Ultimate Sharpshooter Strategy — Built for Professional Derivatives Trading.*
 > **Long. Short. Classic TA. Pure OrderFlow. All in one unified execution engine.**  
-> *Read live market pressure. Trade alongside institutions. On Hyperliquid, dYdX v4, Binance Futures, and Kraken Futures.*
+> *Read live market pressure. Trade alongside institutions. On Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex.*
+
+**Current version: v1.5.16**
+
 ---
-Most bots fail at Futures because they treat it like Spot. **Wick Magic Futures** is engineered from the ground up for derivatives. It understands true bidirectional mechanics, native cross-margin tracking, funding fees, and liquidation risk.
+Most bots fail at Futures because they treat it like Spot. **Wick Magic Futures** is engineered from the ground up for derivatives. It understands true bidirectional mechanics, native cross-margin tracking, funding fees, open interest and liquidation risk.
+
 It fuses **two powerful engines into one strategy**: the battle-tested Wick Magic TA engine, and the bleeding-edge OrderFlow engine that reads live market pressure instead of lagging candles.
+
 ---
 ## ⚡ The Futures Edge
+
 **🔄 True Bidirectional Execution**  
-Shorts are not just "reversed longs". The bot understands that in a Short, you fear supports, and in a Long, you fear resistances. Its DCA engine flawlessly differentiates between *averaging down* (saving a trade) and *scaling up* (adding to a winner), adapting its triggers dynamically.
+Shorts are not just "reversed longs". The bot understands that in a Short, you fear supports, and in a Long, you fear resistances. Its DCA engine differentiates between *averaging down* (saving a trade) and *scaling in* (adding to a winner), adapting its triggers dynamically.
 
 **📊 Native Exchange Telemetry**  
-No guessed math. It hooks directly into the exchange API (Hyperliquid / dYdX v4 / Binance Futures / Kraken Futures) to extract your **Account Margin Usage**, **native ROE**, and **Unrealized PnL** with funding fees already calculated by the exchange. It mathematically monitors your liquidation risk, keeping your account safe at all times.
+No guessed math. It reads your **Account Margin Usage**, **native ROE**, **Unrealized PnL** (with funding already included by the exchange) and **liquidation price** straight from Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex. The futures adapter is picked from the pair's real Gunbot exchange, so a position is never read with the wrong adapter.
 
 **🔪 Kill Position — USD & ATR Dynamic Stop, Trailing Stop & Take Profit**  
-A last-line-of-defence emergency exit, independent of all other logic. Two modes available:
+A last-line-of-defence emergency exit, independent of all other logic. Two modes:
 
-- **USD Mode (classic)** — Fixed dollar thresholds for stop, trail, and take profit.
-- **ATR Mode (new)** — Thresholds that auto-scale with volatility and position size: `multiplier × ATR × qty`. On a volatile pair the stop is naturally wider; when volatility contracts it tightens automatically. Zero manual tuning per pair.
+- **USD Mode** — Fixed dollar thresholds for stop, trail, and take profit.
+- **ATR Mode** — Thresholds that scale with volatility and position size: `multiplier × ATR × qty`. On a volatile pair the stop is naturally wider; when volatility contracts it tightens automatically. Your USD loss stays as a safety floor, so a quiet market can never shrink the stop below your minimum.
 
 Three protection layers, all independent and combinable:
-- **Hard Stop** — If unrealized PnL drops below the configured threshold, the position closes immediately at market regardless of DCA state, trend, or any other gate.
-- **Trailing Stop** — Tracks your peak uPnL. Fires only if the drawdown from that peak exceeds your trail distance. Lets winning trades breathe while protecting against reversals.
-- **Flat Take Profit** — Close immediately when unrealized PnL reaches a fixed target. Ideal for small entries where a flat dollar goal makes more sense than a percentage.
+- **Hard Stop** — If unrealized PnL drops below the threshold, the position closes at market regardless of DCA state, trend, or any other gate.
+- **Trailing Stop** — Arms only once real profit reaches the activation level, then trails your peak uPnL. It can never close a position at a loss.
+- **Flat Take Profit** — Close immediately when unrealized PnL reaches a fixed target.
+
+**🧯 Kill Position DCA Guard**  
+Never doubles your position right before the stop. If an adverse DCA would leave too little room before the Kill Stop, it is skipped.
 
 **🚨 Circuit Breaker — Daily Loss Protection**  
-Prevents runaway losses in a single trading day. Tracks accumulated realized PnL from all closes and kills. If daily losses exceed a configured percentage of your CAPITAL, **all entries are blocked until UTC midnight**. Exits and trailing continue normally — the bot protects existing positions, it just won't open new ones. Set it and forget it.
+Tracks every real close of the day, including kills and liquidation-guard closes. If daily losses exceed a percentage of your CAPITAL, **all entries are blocked until UTC midnight**. Exits and trailing keep working.
+
+**🪂 Exchange Safety Net (Hyperliquid)**  
+Real stop-loss and take-profit **trigger orders resting on Hyperliquid**. They survive a bot crash, a server reboot or an internet outage, and are resized and moved automatically as the position changes. The native take profit can be used on its own.
 
 **💸 Live Funding Rate Intelligence**  
-Perpetual futures charge a periodic funding payment between Long and Short holders. In bull frenzies these rates can hit 200–500% annualized — silently bleeding your margin every hour. Wick Magic monitors this in real time:
-- Live rate and mark price via WebSocket on all four exchanges
-- Countdown to next settlement with per-exchange precision
-- Cumulative funding paid/received since position open (Hyperliquid and dYdX v4)
+Perpetual futures charge a periodic funding payment between Long and Short holders. In bull frenzies these rates can hit 200–500% annualized. Wick Magic monitors this in real time:
+- Live rate and mark price on Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex
+- Countdown to next settlement with per-exchange precision (including AsterDex's per-symbol intervals)
+- Cumulative funding paid/received since position open (Hyperliquid, dYdX v4, AsterDex)
 - Next-period rate prediction (Kraken Futures)
-- **Funding Rate Guard**: automatically blocks new entries and DCA when the annualized rate exceeds your configured maximum — exits are never blocked
+- **Funding Rate Guard**: blocks new entries and DCA when the annualized rate exceeds your maximum, optionally only when *your* side pays. Exits are never blocked.
+
+**📈 Open Interest Guard**  
+Blocks new entries and DCA when the coin's market-wide Open Interest is dangerously high or moving abnormally fast, the classic setup for liquidation cascades. Hyperliquid, dYdX v4 and AsterDex.
 
 ---
 ## 🌊 The OrderFlow Engine (Active Focus)
 *Why look at where the price was, when you can see where it is going?*
 
 **⚖️ Live Order Book Imbalance**  
-Calculates buying vs selling pressure in real time as a normalized score from -1 (pure sell pressure) to +1 (pure buy pressure). This is the primary entry signal.
+Calculates buying vs selling pressure in real time as a normalized score from -1 (pure sell pressure) to +1 (pure buy pressure). This is the primary entry signal, confirmed by the live tape (Public Trade History).
 
 **🧬 Self-Calibrating via Genetic Algorithm**  
-The GA evolves buy/sell thresholds against up to 2000 real candles of this pair's history, across 60 candidates and 220 generations. It recalibrates every 4 hours, or instantly if ATR volatility shifts. No manual tuning needed.
+The GA evolves the buy/sell thresholds against this pair's own recent market history. It recalibrates on a schedule, instantly when volatility shifts, and early when the market runs strongly one way. No manual tuning needed.
 
-**⚡ Volatility Percentile Gate — Smart Entry Filtering**  
-Markets get choppy. When they do, orderflow signals generate more noise — false breakouts, whipsaws, traps. The Volatility Percentile Gate watches the ATR over a rolling window of recent candles and compares it to its own history. If the current ATR is in the top percentile (e.g. above P80), entry thresholds are automatically raised by a configurable multiplier — making the bot demand a stronger signal before risking capital. When volatility cools down, thresholds return to normal instantly. Configurable timeframe (`period`, `long`, `daily`), lookback window, and multiplier. Stacks with Institution Hours scout mode.
+**🌀 Market Regime Filters**  
+Four optional filters decide whether the market is worth trading at all:
+- **⚡ Volatility Percentile Gate** — demands a stronger signal when volatility is unusually high.
+- **📊 ATR Strength Classifier** — raises the bar in dead or violent markets, fully automatic.
+- **📉 ROC Momentum Filter** — skips entries at the tail end of a fading move.
+- **🌀 Chop Guard** — hard-blocks fresh entries while the market has no trend.
 
 **🏗️ Multi-Timeframe S/R Confluence**  
-Entries and rebuys only fire when price is near a validated support or resistance level.
+Entries and rebuys only fire near a validated support or resistance level (or anywhere, if you switch the S/R Proximity Gate off).
 - *Longs* are blocked from buying just under HTF resistances.
 - *Shorts* are blocked from selling just above HTF supports.
 
 **🧲 Smart S/R Bias**  
-Goes beyond confluence. Gates *which direction* you can enter based on where price is relative to the zone. Near support → LONG only. Near resistance → SHORT only. Break confirmation requires N full candles on the other side before bias flips — no false breakout entries.
+Gates *which direction* you can enter. Near support → LONG only. Near resistance → SHORT only. A break must be confirmed by full candles of **the level's own timeframe** before bias flips, so a few 5-minute closes can never flip a 4h or daily level.
+
+**🔄 S/R Direction Exit**  
+Cuts a small, fresh position early when the market structure turns against it, with a minimum hold time, a configurable loss limit (on price or on margin), a timeframe filter and an optional Confluence confirmation.
 
 **🪤 Bull & Bear Trap Detection**  
 Cross-checks order book shape against actual trade flow. Suspicious divergences block the entry or the DCA rebuy.
 
 **🐋 Institutional Absorption**  
-Detects when large players are defending a level — high sell volume on tape, price barely moving, bid side holding. Used as extra confirmation or to override a bearish tape read.
+Detects when large players are defending a level. Used as extra confirmation for entries.
 
 **🏦 Institution Hours**  
-Full power during London–NY overlap (7–21 UTC). Outside those hours: scout mode raises thresholds 1.4× and enforces absorption, or block mode stops entries entirely. Exits are never affected.
+Full power during the London–NY window (configurable, default 7–21 UTC). Outside it: scout mode with stricter requirements, or block mode. Separate weekend handling. Exits are never affected.
 
 **📡 Cross-Exchange Signal Pair**  
-Some exchanges (like Hyperliquid) have thin public trade history or no PTH endpoint at all. Configure `OF_SIGNAL_PAIR` and `OF_SIGNAL_EXCHANGE` to point to a more liquid market — read Order Book and PTH from `USDT-ETH` on OKX while executing trades on Hyperliquid. Full sidebar transparency: tile shows `USDT-ETH @ okx` when cross-exchange mode is active.
+Read the Order Book and tape from a more liquid market (e.g. `USDT-ETH` on Binance Futures) while executing on Hyperliquid. The sidebar shows `USDT-ETH @ binanceFutures` when active.
+
+**🚦 Entry Gate**  
+One sidebar tile that tells you exactly which gate is holding back a fresh entry. No more guessing why the bot is not entering.
+
+---
+## 📈 Position Management
+
+**🧾 True Cost Basis**  
+With below-entry partials on, the bot closes profitable fills even while the position average is underwater, and tracks the **real** cost of what is left. Target Exit, trailing, re-entries and DCA all follow that True Cost, shown live in the sidebar and on the chart.
+
+**🚀 Scale-In**  
+Add to a winning position with separate caps for Long and Short, only inside a profit window and never once the trail has armed.
+
+**💧 Auto-ATR DCA**  
+DCA spacing that adapts to volatility, with a ladder that keeps working after bounces.
+
+**📐 DCA Trading Limit Multiplier** *(experimental)*  
+Each DCA buy can grow the deeper the ladder goes, manually or by ATR distance, always capped.
+
+**🔥 Win Streak Trading Limit** *(experimental)*  
+The next entry grows after each winning cycle, and returns to base after a DCA or a losing close.
+
+**💰 Compound Profits & Min Notional**  
+Trade size follows your realized PnL. With Compound on, a size below the exchange minimum is raised to it; otherwise the order is blocked instead of rejected. A full close is never blocked by the exchange minimum.
 
 ---
 ## 🎯 The Classic Engine (Included)
@@ -74,121 +120,155 @@ For traders who prefer structural Technical Analysis, the classic sniper engine 
 - **Ultra-precise entries:** Heikin Ashi, RSI, WRI, and Breakout logic.
 - **Trend Shields:** Wick Magic Trend Algo & SMA200 guards.
 - **Elastic Trailing:** Dynamically tightens or loosens based on volatility.
-- **FGI Mimix Scaling:** Invest more during fear, scale down during greed.
+- **FGI Mimix Scaling:** Invest more during fear, scale down during greed (Alternative.me or CoinMarketCap).
 
 **🏛️ Institutional Trend Mode**  
-When using AUTO direction, three independent macro trend engines are available:
-- **`sma200`** — Price above/below the 200-period SMA on the selected timeframe.
+When using AUTO direction, five macro trend engines are available:
+- **`sma200`** — Price above/below the 200-period SMA.
 - **`supertrend`** — Direction from SuperTrend, configurable period and multiplier.
-- **`smacross`** — SMA100 vs SMA200 crossover: bullish above, bearish below.
+- **`smacross`** — SMA100 vs SMA200 crossover.
+- **`emadual`** — A daily and a higher-timeframe filter must agree; SuperTrend breaks ties.
+- **`confluence`** — Only commits to a direction when enough independent confirmations agree, and holds it when they do not.
 
-Each engine can be pointed at the short, long, or daily timeframe — letting you gate direction at macro level while entries remain fast and local.
+Each engine can be pointed at the short, long, or daily timeframe. Add the experimental **Confluence Entry Gate** to only open fresh entries when the Confluence Score backs their side.
 
 ---
 ## 📟 Sidebar — What You See Live
-Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, and funding in real-time.
+Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, funding and open interest in real time, grouped in clear sections.
 
 ```text
-🌊 OrderFlow Fut 1.3.0    🌊 OrderFlow (LONG)
-ROC (annualized)          999.0%
-🏦 Total Capital          400.00 USDT
-📉 Unrealized P&L         -0.14 USDT
-📊 PnL (ROE %)            -0.43%
+🌊 OrderFlow Fut 1.5.16   LONG
+── 📊 PERFORMANCE & STATUS ──────────────────
+ROC (annualized)          212.4%
+⚙️ Mode                   💰 CLOSE
+── 🎯 POSITION ──────────────────────────────
 ⚠️ Margin Usage           5.41%
-💵 Margin available       346.47 USDT
+💰 Position margin        33.10 USDT
 📦 Position size          0.15 ZEC
-------------------------------------------------
+🧾 True Cost              660.20 (+0.42%)
+💵 True uPnL              +0.05 USDT (+0.14% ROE)
+── 🛟 RISK & PROTECTION ─────────────────────
+🪢 Rekt Liq. Price        426.70 (35.4% away)
+🛡️ Liq. Limit             35.4% / 20% → 533.40
+🔪 Kill Position          $+0.47 / -$3.0 [ATR]
+🚨 Circuit Breaker        $-5.20 / -$14.0
+🛟 Native SL/TP           SL 636.80 (3.59%) / TP off
+── 🌊 SIGNAL & ENTRIES ──────────────────────
 🌊 Signal (LONG)          🟢 BULLISH
+🚦 Entry Gate             ⚪ N/A (position open)
 ⚖️ Imbalance              0.0576
 🟢 Buy threshold          0.0576
-🔴 Sell threshold         -0.0500
 🧬 GA samples             700 / 120 ✓
 🪤 Trap guard             CLEAR
 🔬 PTH trades             1000 (2s ago)
 🏗️ S/R gate               ON (±0.8%)
-🏗️ S/R zone               0 / 2
-🐋 Absorption             ON
+🔄 S/R DirExit            ARMED · 4h
+── 🏛️ TREND & FILTERS ───────────────────────
+🏛️ Inst. Trend            LONG
+🌀 Chop Guard             ✅ OK · ADX 27.4 / 18
 ⚡ Vol Gate               P45 / 80
-------------------------------------------------
+── 💸 FUNDING & MARKET ──────────────────────
 📌 Mark Price             660.50
-💸 Funding Rate           🟢 -0.0028% / 8h
-⏰ Next Funding           3h 45m
-🛡️ Funding Guard          ✅ CLEAR (44% APR)
-------------------------------------------------
-🔪 Kill Position          $-2.10 / -$33.0 [ATR]
-🚨 Circuit Breaker        $-5.20 / -$14.0
-🛡️ Liq. Limit (%)         20% (SAFE ✓)
-🪢 Rekt Liq. Price        585.30 (11.4% dist)
+💸 Funding Rate           🟢 +0.0028% / 1h
+⏰ Next Funding           45m 12s
+🛡️ Funding Guard          ✅ OK (24.5% PAY)
+📈 Open Interest          $237,070,898
 ```
 
 ---
-## 🔥 What's New in v1.3.0
+## 🔥 What's New in v1.5.16
 
-### 🔪 Kill Position ATR Mode — Dynamic Stops That Scale With Volatility
-Kill Position now supports two modes: the classic fixed USD thresholds, and a new **ATR mode** where stop, trail, and take profit are calculated as `multiplier × ATR × position_qty`. On a volatile pair like ZEC the stop is naturally wider; on a stable pair like BTC it tightens — all automatic, zero per-pair tuning.
+**🛡️ Protection**
+- **Kill Position DCA Guard** — no adverse DCA right before the Kill Stop.
+- **Reliable trailing kill** — arms only when the open profit really reaches the activation level, and stays armed until close.
+- **Native Take Profit on its own** — the Exchange Safety Net TP no longer needs Kill Position.
+- **Stronger Circuit Breaker** — counts every real close, including Liquidation Guard closes.
+- **Restart & desync safety** — no adds on the restart candle, no re-entry on top of a fill Gunbot cannot see, no entries on frozen candles.
 
-### 🚨 Circuit Breaker — Daily Realized PnL Limit
-New safety net that tracks accumulated realized PnL across all closes and kills during the day. When daily losses exceed a configured percentage of CAPITAL, all entries are blocked until UTC midnight. Prevents cascading kills from wiping out a good week in a single volatile day.
+**🎯 Smarter entries & exits**
+- **S/R Proximity Gate** switch, and **HTF break confirmation** for Smart S/R Bias.
+- **S/R Direction Exit**: Min Hold, Imbalance Mode, Strict Timeframe, Confluence Confirmation, Max Position up to 10×, and an experimental **Re-Entry Lock**.
+- **Confluence Entry Gate** *(experimental)*.
+- More precise **partial closes**: checked at the real exit price, valid between entry and True Cost, and working with small trade sizes.
 
-### ⚡ Volatility Percentile Gate — Smart Entry Filtering
-Watches the ATR over a rolling window of candles and ranks it as a percentile. When the current ATR exceeds the configured gate (e.g. P80), entry thresholds are automatically multiplied — demanding a stronger orderflow signal before risking capital. Configurable timeframe (`period` for fast reaction to dumps, `long` for regime filtering, `daily` for macro view), lookback window, and multiplier. Stacks with Institution Hours scout mode.
+**📈 Position management**
+- **True Cost Basis** now drives Target Exit, trailing, re-entries and DCA, with new `🧾 True Cost` / `💵 True uPnL` tiles and a TCB chart line.
+- **DCA Trading Limit Multiplier** and **Win Streak Trading Limit** *(experimental)*.
+- **Scale-In: Allow While Underwater**.
+- **Compound Profits** rebuilt: stored in the pair state, shorts counted correctly, reset when switched off.
+- **Min Notional** now also covers closes, partials and dust.
 
-### 🐛 Cooldown Display Fix
-The chart status cooldown indicator now mirrors the actual entry logic exactly. Previously it could show "blocked cooldown" incorrectly when no position was open and the cooldown had already expired. Now it distinguishes between "rebuy cooldown" (with position) and "re-entry cooldown" (after full close) and checks the correct timer for each.
+**🌐 Exchanges, editor & chart**
+- Futures adapter detected from the pair's exchange.
+- Binance public tape keeps working when the core returns an API-key error.
+- AsterDex Multi-Assets and BTC collateral mode (Kraken / Binance) capital fixes.
+- New **Protections** and **Fear & Greed** editor tabs.
+- Entry, Target Exit, TCB, Kill Stop and Kill Trail lines on the chart.
 
----
-## 🔥 What's New in v1.2.7
+<details>
+<summary><b>v1.5.4 highlights</b></summary>
 
-### 💸 Funding Rate Intelligence (All 4 Exchanges)
-Every supported exchange now streams live funding rate data directly into the strategy:
+<br>
 
-| Exchange | Feed | Settlement | Extras |
-|---|---|---|---|
-| Hyperliquid | WebSocket `activeAssetCtx` | 1h | Cumulative funding since open |
-| dYdX v4 | WebSocket `v4_markets` | 1h | Oracle price, cumulative funding |
-| Binance Futures | REST poll every 30s | 8h | Mark price, next settlement |
-| Kraken Futures | WebSocket `ticker` | 1h | Live rate + next period prediction |
-| BYdFi | WebSocket `ticker` | 1h | Oracle price, Live rate + next period  prediction |
+- **Exchange Safety Net** on Hyperliquid and **Open Interest Guard**.
+- **Kill Position Trail Activation** — the trailing kill never closes at a loss.
+- **ATR Strength Classifier, ROC Momentum Filter and Chop Guard**.
+- **`confluence` trend engine** and self-correcting GA calibration.
+- **Scale-In** redesign with separate Long/Short caps.
+- **AsterDex Futures** and **BYDFi Futures** support, **`hl_autopair`** preset.
+- **🚦 Entry Gate** tile.
 
-**Funding Rate Guard** — configure a maximum annualized rate (e.g. 300%). When the live rate exceeds it, all entries and DCA are blocked. Exits are never affected. Rates are normalized to APR across all exchanges for a fair comparison regardless of settlement frequency.
+</details>
 
-### 🔪 Kill Position Take Profit (USD)
-Third mode for Kill Position: set a flat USD profit target. The moment unrealized PnL hits +$X, the position closes immediately at market — no trailing required, no waiting for an OF signal.
+<details>
+<summary><b>v1.3.0 and v1.2.7 highlights</b></summary>
 
-### 🏁 Kraken Futures — Now Final
-Kraken Futures moves from Beta to **Final** status. The dedicated real-time WebSocket connection for multi-collateral margin reading is fully stable, and funding rate telemetry via the `ticker` feed is confirmed working on all major pairs.
+<br>
 
-### ⚙️ New Orderflow Parameters
-- **`ORDERFLOW_REBUY_ATR_MULT`** — Fine-tune the ATR multiplier for auto DCA spread without changing the base timeframe.
-- **`ORDERFLOW_EXIT_IGNORE_ALL`** — Bypass all OF exit conditions (exits fire on profit target and trailing only).
-- **`OF_PARTIAL_TA_EXIT`** — Allow partial closes on HA color flip even in pure OF mode.
-- **`MIN_VOLUME_TO_SELL`** — Prevent attempting to close dust positions below a USD notional threshold.
+- **Kill Position ATR mode** and **flat USD Take Profit**.
+- **Circuit Breaker** — daily realized PnL limit.
+- **Volatility Percentile Gate**.
+- **Funding Rate Intelligence** on every supported exchange, with the annualized **Funding Rate Guard**.
+- **Kraken Futures** moved to Final.
+
+</details>
 
 ---
 ## 🌐 Supported Exchanges
 
 | Exchange | Status | Features |
 |---|---|---|
-| **Hyperliquid** | ✅ Final | Full OF, PTH via Signal Pair, live funding, unified collateral |
-| **dYdX v4** | ✅ Final | Full OF, live PTH, oracle price, live funding |
-| **Binance Futures** | ✅ Final | Full OF, live PTH, mark price, funding rate (8h) |
-| **Kraken Futures** | ✅ Final | Full OF, live PTH, multi-collateral, funding + prediction |
-| **BidFi | ✅ Final | Full OF, live PTH, oracle price, funding + prediction |
+| **Hyperliquid** | ✅ Final | Full OF, PTH via Signal Pair, live funding, Open Interest, Exchange Safety Net, unified collateral |
+| **dYdX v4** | ✅ Final | Full OF, live PTH, oracle price, live funding, Open Interest |
+| **Binance Futures** | ✅ Final | Full OF, live PTH, mark price, funding rate (8h), BTC collateral preset |
+| **Kraken Futures** | ✅ Final | Full OF, live PTH, multi-collateral, funding + next-period prediction, BTC collateral preset |
+| **AsterDex** | ✅ Final | Full OF, live PTH, live funding with per-symbol interval, real cumulative funding, Open Interest |
+| **BYDFi** | ✅ Available | Position, margin and liquidation telemetry |
 
 ---
 ## 📖 Full Documentation
-Everything is heavily documented in the Wiki:
-- [What is OrderFlow Trading?](https://github.com/truitaman/OrderFlow-Magic/wiki#-1-what-is-orderflow-trading)
-- [The Machine Learning Engine (GA)](https://github.com/truitaman/OrderFlow-Magic/wiki#-2-the-machine-learning-engine)
-- [Support & Resistance Confluence](https://github.com/truitaman/OrderFlow-Magic/wiki#-3-support--resistance-confluence)
-- [Smart S/R Bias](https://github.com/truitaman/OrderFlow-Magic/wiki#-4-smart-sr-bias-direction-gate)
-- [Trap Detection, Absorption, Institution Hours](https://github.com/truitaman/OrderFlow-Magic/wiki#-5-bull--bear-trap-detection)
-- [Volatility Percentile Gate](https://github.com/truitaman/OrderFlow-Magic/wiki#-volatility-percentile-gate)
-- [Kill Position — USD & ATR Dynamic Stop](https://github.com/truitaman/OrderFlow-Magic/wiki#-9-kill-position--usd-hard-stop--trailing-stop)
-- [Funding Rate Intelligence](https://github.com/truitaman/OrderFlow-Magic/wiki#-11-funding-rate-intelligence-)
-- [Compound Profits & Dump Protection](https://github.com/truitaman/OrderFlow-Magic/wiki#-13-futures-margin--compound-profits)
-- [OrderFlow vs Classic Branch](https://github.com/truitaman/OrderFlow-Magic/wiki#-20-orderflow-vs-classic-branch)
-- [Full Settings Reference](https://github.com/truitaman/OrderFlow-Magic/wiki#-17-editor-settings-reference)
+Everything is documented in the Wiki:
+- [What is OrderFlow Trading in Futures?](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-1-what-is-orderflow-trading-in-futures)
+- [The Machine Learning Engine (GA)](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-2-the-machine-learning-engine)
+- [Support & Resistance Confluence](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-3-support--resistance-confluence-futures-adapted)
+- [Smart S/R Bias & Direction Exit](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-4-smart-sr-bias-direction-gate)
+- [Trap Detection, Absorption, Institution Hours](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-5-bull--bear-trap-detection)
+- [Cross-Exchange Signal Pair](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-8-cross-exchange-signal-pair)
+- [Market Regime Filters & Entry Gate](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-9-market-regime-filters)
+- [Kill Position, DCA Guard & Circuit Breaker](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-10-kill-position--usd-hard-stop--trailing-stop)
+- [Liquidation Guard](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-11-liquidation-guard--native-margin-protection)
+- [Exchange Safety Net (Hyperliquid)](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-12-exchange-safety-net-hyperliquid)
+- [Funding Rate Intelligence](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-13-funding-rate-intelligence-)
+- [Open Interest Guard](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-14-open-interest-guard)
+- [Institutional Trend Mode & Confluence Entry Gate](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-15-institutional-trend-mode)
+- [Margin, Compound Profits & Win Streak](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-16-futures-margin--compound-profits)
+- [Below-Entry Partials & True Cost Basis](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-below-entry-partial-close-soft-reduction)
+- [Auto-ATR DCA, DCA Multiplier & Scale-In](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-18-auto-atr-dca--scale-in)
+- [OrderFlow Presets](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-19-orderflow-presets)
+- [Full Settings Reference](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-20-editor-settings-reference)
+- [Sidebar & Chart Lines](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-21-the-orderflow-sidebar-futures-edition)
+- [OrderFlow vs Classic Branch](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-23-orderflow-vs-classic-branch)
+- [Tips & Best Practices](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-24-tips--best-practices-for-futures)
 
 ---
 ## 🛍️ Get the Strategy
