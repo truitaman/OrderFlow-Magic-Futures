@@ -280,6 +280,6 @@ Requires a valid **Gunbot Defi license** to execute.
 [https://t.me/+pztaQ-2x7ZFmNDc0](https://t.me/+xQtQ9Y4AOc9lZTNk)
 
 No Defi license yet?  
-→ Upgrade from Standard — $185: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
+→ Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
 → Upgrade from Pro — $70: [Purchase here](https://checkout.gunbot.com/crazymop/promoProToDefi)  
 → New to Gunbot: [gunbot.com](https://checkout.gunbot.com/crazymop/ultimate)
