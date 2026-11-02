@@ -3,7 +3,7 @@
 > **Long. Short. Classic TA. Pure OrderFlow. All in one unified execution engine.**  
 > *Read live market pressure. Trade alongside institutions. On Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex.*
 
-**Current version: v1.5.16**
+**Current version: v1.5.17**
 
 ---
 Most bots fail at Futures because they treat it like Spot. **Wick Magic Futures** is engineered from the ground up for derivatives. It understands true bidirectional mechanics, native cross-margin tracking, funding fees, open interest and liquidation risk.
@@ -112,7 +112,7 @@ Each DCA buy can grow the deeper the ladder goes, manually or by ATR distance, a
 The next entry grows after each winning cycle, and returns to base after a DCA or a losing close.
 
 **💰 Compound Profits & Min Notional**  
-Trade size follows your realized PnL. With Compound on, a size below the exchange minimum is raised to it; otherwise the order is blocked instead of rejected. A full close is never blocked by the exchange minimum.
+Trade size grows in proportion to your realized return on Total Capital, the same on entries and DCA. With Compound on, a size below the exchange minimum is raised to it; otherwise the order is blocked instead of rejected. A full close is never blocked by the exchange minimum.
 
 ---
 ## 🎯 The Classic Engine (Included)
@@ -137,7 +137,7 @@ Each engine can be pointed at the short, long, or daily timeframe. Add the exper
 Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, funding and open interest in real time, grouped in clear sections.
 
 ```text
-🌊 OrderFlow Fut 1.5.16   LONG
+🌊 OrderFlow Fut 1.5.17   LONG
 ── 📊 PERFORMANCE & STATUS ──────────────────
 ROC (annualized)          212.4%
 ⚙️ Mode                   💰 CLOSE
@@ -176,7 +176,13 @@ ROC (annualized)          212.4%
 ```
 
 ---
-## 🔥 What's New in v1.5.16
+## 🔥 What's New in v1.5.17
+
+**💰 New in v1.5.17**
+- **Compound Profits grows with your capital** — proportional to your real return on Total Capital, the same on entries and DCA, instead of adding the full offset to every order
+- **Less log noise** on S/R zone changes
+
+**Also in v1.5.16**
 
 **🛡️ Protection**
 - **Kill Position DCA Guard** — no adverse DCA right before the Kill Stop.
@@ -272,12 +278,12 @@ Everything is documented in the Wiki:
 
 ---
 ## 🛍️ Get the Strategy
-Requires a valid **Gunbot Defi license** to execute.
+Requires a valid **Gunbot Defi license** to run on Hyperliquid or dYdX v4.
 
 > 🛒 **[Purchase Wick Magic Here](https://www.gunbot.com/devcommunity/wickmagic-futures)**
 
 👉 **Join the Telegram community:**  
-[https://t.me/+pztaQ-2x7ZFmNDc0](https://t.me/+xQtQ9Y4AOc9lZTNk)
+https://t.me/+pztaQ-2x7ZFmNDc0
 
 No Defi license yet?  
 → Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
