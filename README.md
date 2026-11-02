@@ -283,7 +283,7 @@ Requires a valid **Gunbot Defi license** to run on Hyperliquid or dYdX v4.
 > 🛒 **[Purchase Wick Magic Here](https://www.gunbot.com/devcommunity/wickmagic-futures)**
 
 👉 **Join the Telegram community:**  
-https://t.me/+pztaQ-2x7ZFmNDc0
+[https://t.me/+pztaQ-2x7ZFmNDc0](https://t.me/+xQtQ9Y4AOc9lZTNk)
 
 No Defi license yet?  
 → Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
