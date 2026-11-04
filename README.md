@@ -3,7 +3,7 @@
 > **Long. Short. Classic TA. Pure OrderFlow. All in one unified execution engine.**  
 > *Read live market pressure. Trade alongside institutions. On Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex.*
 
-**Current version: v1.5.17**
+**Current version: v1.5.19**
 
 ---
 Most bots fail at Futures because they treat it like Spot. **Wick Magic Futures** is engineered from the ground up for derivatives. It understands true bidirectional mechanics, native cross-margin tracking, funding fees, open interest and liquidation risk.
@@ -49,6 +49,9 @@ Perpetual futures charge a periodic funding payment between Long and Short holde
 
 **📈 Open Interest Guard**  
 Blocks new entries and DCA when the coin's market-wide Open Interest is dangerously high or moving abnormally fast, the classic setup for liquidation cascades. Hyperliquid, dYdX v4 and AsterDex.
+
+**🧲 Liquidation Map** *(experimental, Hyperliquid)*  
+See where the nearest liquidation clusters sit above and below price, in the sidebar and as lines on the chart. Those clusters are where the big wicks come from, and price often runs to sweep them. Observe only for now.
 
 ---
 ## 🌊 The OrderFlow Engine (Active Focus)
@@ -137,7 +140,7 @@ Each engine can be pointed at the short, long, or daily timeframe. Add the exper
 Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, funding and open interest in real time, grouped in clear sections.
 
 ```text
-🌊 OrderFlow Fut 1.5.17   LONG
+🌊 OrderFlow Fut 1.5.19   LONG
 ── 📊 PERFORMANCE & STATUS ──────────────────
 ROC (annualized)          212.4%
 ⚙️ Mode                   💰 CLOSE
@@ -176,9 +179,12 @@ ROC (annualized)          212.4%
 ```
 
 ---
-## 🔥 What's New in v1.5.17
+## 🔥 What's New in v1.5.19
 
-**💰 New in v1.5.17**
+**🧲 New in v1.5.19**
+- **Liquidation Map** *(experimental, Hyperliquid)* — the nearest liquidation clusters above and below price, in the sidebar and as lines on the chart. Observe only for now.
+
+**Also in v1.5.17**
 - **Compound Profits grows with your capital** — proportional to your real return on Total Capital, the same on entries and DCA, instead of adding the full offset to every order
 - **Less log noise** on S/R zone changes
 
@@ -266,6 +272,7 @@ Everything is documented in the Wiki:
 - [Exchange Safety Net (Hyperliquid)](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-12-exchange-safety-net-hyperliquid)
 - [Funding Rate Intelligence](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-13-funding-rate-intelligence-)
 - [Open Interest Guard](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-14-open-interest-guard)
+- [Liquidation Map (Hyperliquid)](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-liquidation-map-experimental-hyperliquid)
 - [Institutional Trend Mode & Confluence Entry Gate](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-15-institutional-trend-mode)
 - [Margin, Compound Profits & Win Streak](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-16-futures-margin--compound-profits)
 - [Below-Entry Partials & True Cost Basis](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-below-entry-partial-close-soft-reduction)
@@ -278,12 +285,12 @@ Everything is documented in the Wiki:
 
 ---
 ## 🛍️ Get the Strategy
-Requires a valid **Gunbot Defi license** to run on Hyperliquid or dYdX v4.
+Requires a valid **Gunbot Defi/Unlimited license** to run on Hyperliquid or dYdX v4.
 
 > 🛒 **[Purchase Wick Magic Here](https://www.gunbot.com/devcommunity/wickmagic-futures)**
 
 👉 **Join the Telegram community:**  
-[https://t.me/+pztaQ-2x7ZFmNDc0](https://t.me/+xQtQ9Y4AOc9lZTNk)
+https://t.me/+pztaQ-2x7ZFmNDc0
 
 No Defi license yet?  
 → Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
