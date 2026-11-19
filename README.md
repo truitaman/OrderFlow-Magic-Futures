@@ -3,7 +3,7 @@
 > **Long. Short. Classic TA. Pure OrderFlow. All in one unified execution engine.**  
 > *Read live market pressure. Trade alongside institutions. On Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex.*
 
-**Current version: v1.5.19**
+**Current version: v1.5.24**
 
 ---
 Most bots fail at Futures because they treat it like Spot. **Wick Magic Futures** is engineered from the ground up for derivatives. It understands true bidirectional mechanics, native cross-margin tracking, funding fees, open interest and liquidation risk.
@@ -23,18 +23,27 @@ No guessed math. It reads your **Account Margin Usage**, **native ROE**, **Unrea
 A last-line-of-defence emergency exit, independent of all other logic. Two modes:
 
 - **USD Mode** — Fixed dollar thresholds for stop, trail, and take profit.
-- **ATR Mode** — Thresholds that scale with volatility and position size: `multiplier × ATR × qty`. On a volatile pair the stop is naturally wider; when volatility contracts it tightens automatically. Your USD loss stays as a safety floor, so a quiet market can never shrink the stop below your minimum.
+- **ATR Mode** — Thresholds that scale with volatility and position size: `multiplier × ATR × qty`. On a volatile pair the stop is naturally wider; when volatility contracts it tightens automatically. Your USD loss stays as a safety floor, so a quiet market can never shrink the stop below your minimum. The ATR can follow the trading period, the long period or the daily candle, for wider and steadier stops on positions held for hours or days.
 
 Three protection layers, all independent and combinable:
 - **Hard Stop** — If unrealized PnL drops below the threshold, the position closes at market regardless of DCA state, trend, or any other gate.
 - **Trailing Stop** — Arms only once real profit reaches the activation level, then trails your peak uPnL. It can never close a position at a loss.
 - **Flat Take Profit** — Close immediately when unrealized PnL reaches a fixed target.
 
+**🏄 Trailing Only Full Close**  
+Let the winners run. The Kill Position trail becomes the only full close in profit: no fixed close at Minimum Profit capping every winner. It arms at Target ROE, follows the move and never closes below break-even plus fees.
+
 **🧯 Kill Position DCA Guard**  
 Never doubles your position right before the stop. If an adverse DCA would leave too little room before the Kill Stop, it is skipped.
 
 **🚨 Circuit Breaker — Daily Loss Protection**  
-Tracks every real close of the day, including kills and liquidation-guard closes. If daily losses exceed a percentage of your CAPITAL, **all entries are blocked until UTC midnight**. Exits and trailing keep working.
+Tracks every real close of the day, including kills, liquidation-guard closes and the native stop on Hyperliquid. If daily losses exceed a percentage of your CAPITAL, **all entries are blocked until UTC midnight**. Exits and trailing keep working.
+
+**🧮 Risk Budget — Account-Wide Risk Control**  
+Nine pairs, one account, one budget. A shared daily and weekly loss limit for **all pairs on the exchange**, counting the risk of every open position. A fresh entry that does not fit is reduced or blocked; exits, trailing, Kill Position and DCA never are. Start in `monitor` mode to see what it would do.
+
+**🎯 Risk Per Trade & Auto Size**  
+Set your maximum loss per position as a % of your capital and the Kill Position stop becomes exactly that amount. Auto Size sizes every entry from the pair's own volatility, so a calm pair and a volatile one risk the same dollars.
 
 **🪂 Exchange Safety Net (Hyperliquid)**  
 Real stop-loss and take-profit **trigger orders resting on Hyperliquid**. They survive a bot crash, a server reboot or an internet outage, and are resized and moved automatically as the position changes. The native take profit can be used on its own.
@@ -112,7 +121,7 @@ DCA spacing that adapts to volatility, with a ladder that keeps working after bo
 Each DCA buy can grow the deeper the ladder goes, manually or by ATR distance, always capped.
 
 **🔥 Win Streak Trading Limit** *(experimental)*  
-The next entry grows after each winning cycle, and returns to base after a DCA or a losing close.
+The next entry grows after each winning cycle, up to 2× the Trade Size, and returns to base after a DCA or a losing close.
 
 **💰 Compound Profits & Min Notional**  
 Trade size grows in proportion to your realized return on Total Capital, the same on entries and DCA. With Compound on, a size below the exchange minimum is raised to it; otherwise the order is blocked instead of rejected. A full close is never blocked by the exchange minimum.
@@ -133,14 +142,14 @@ When using AUTO direction, five macro trend engines are available:
 - **`emadual`** — A daily and a higher-timeframe filter must agree; SuperTrend breaks ties.
 - **`confluence`** — Only commits to a direction when enough independent confirmations agree, and holds it when they do not.
 
-Each engine can be pointed at the short, long, or daily timeframe. Add the experimental **Confluence Entry Gate** to only open fresh entries when the Confluence Score backs their side.
+Each engine can be pointed at the short, long, or daily timeframe. Add the experimental **Confluence Entry Gate** to only open fresh entries when the Confluence Score backs their side, and **🧭 Confluence Flip Exit** to close a position in profit as soon as the Confluence Score turns against it.
 
 ---
 ## 📟 Sidebar — What You See Live
 Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, funding and open interest in real time, grouped in clear sections.
 
 ```text
-🌊 OrderFlow Fut 1.5.19   LONG
+🌊 OrderFlow Fut 1.5.24   LONG
 ── 📊 PERFORMANCE & STATUS ──────────────────
 ROC (annualized)          212.4%
 ⚙️ Mode                   💰 CLOSE
@@ -153,8 +162,10 @@ ROC (annualized)          212.4%
 ── 🛟 RISK & PROTECTION ─────────────────────
 🪢 Rekt Liq. Price        426.70 (35.4% away)
 🛡️ Liq. Limit             35.4% / 20% → 533.40
-🔪 Kill Position          $+0.47 / -$3.0 [ATR]
-🚨 Circuit Breaker        $-5.20 / -$14.0
+🔪 Kill Position          $+0.47 / -$20.00 [Risk]
+🧮 Risk Budget            D $-25 / -$80 · open $60
+🎯 Risk / Trade           $20.00 · size $300
+🚨 Circuit Breaker        Account-wide
 🛟 Native SL/TP           SL 636.80 (3.59%) / TP off
 ── 🌊 SIGNAL & ENTRIES ──────────────────────
 🌊 Signal (LONG)          🟢 BULLISH
@@ -179,9 +190,29 @@ ROC (annualized)          212.4%
 ```
 
 ---
-## 🔥 What's New in v1.5.19
+## 🔥 What's New in v1.5.24
 
-**🧲 New in v1.5.19**
+**🧮 Risk management for the whole account**
+- **Risk Budget** — one shared daily and weekly loss budget for all pairs on the exchange. Entries that do not fit are reduced or blocked, with a new `🧮 Risk Budget` tile.
+- **Risk Per Trade & Auto Size** — the Kill Position stop becomes your risk per trade, and every entry is sized from the pair's volatility. DCA, rebuys and Scale-In follow the auto entry size.
+- **Kill Position ATR Timeframe** — the ATR of the stop, trail and take profit can follow the period, long or daily candles.
+
+**🏄 Built for trends and swings**
+- **Trailing Only Full Close** — the Kill Position trail is the only full close in profit. Arms at Target ROE, never closes below break-even plus fees.
+- **Confluence Flip Exit** — close in profit when the Confluence Score turns against the position.
+- **Wider trailing limits** — Trailing up to 10%, Max Dynamic Trail up to 15%, KP ATR Trail Multiplier up to 12.
+
+**🛠️ Fixes & improvements**
+- The native stop on Hyperliquid now counts for the Circuit Breaker.
+- Kill Position retries a close rejected by Hyperliquid (e.g. an expired API wallet) instead of waiting.
+- Buy Cooldown also counts from the last partial close.
+- Win Streak capped at 2× the Trade Size.
+- True Cost counts the whole cycle with the real fills, and partials never leave dust.
+- Higher timeframe data stays current, so Confluence and the trend see the live price.
+- Kill Position USD fields without a cap, Kraken Futures BTC collateral fixed, Signal Pair fixed on Binance, Kraken and Aster Futures.
+- Lighter ticks: no freeze on a slow exchange answer, less log noise.
+
+**🧲 Also in v1.5.19**
 - **Liquidation Map** *(experimental, Hyperliquid)* — the nearest liquidation clusters above and below price, in the sidebar and as lines on the chart. Observe only for now.
 
 **Also in v1.5.17**
@@ -268,12 +299,15 @@ Everything is documented in the Wiki:
 - [Cross-Exchange Signal Pair](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-8-cross-exchange-signal-pair)
 - [Market Regime Filters & Entry Gate](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-9-market-regime-filters)
 - [Kill Position, DCA Guard & Circuit Breaker](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-10-kill-position--usd-hard-stop--trailing-stop)
+- [Trailing Only Full Close](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-trailing-only-full-close)
+- [Risk Budget & Risk Per Trade](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-risk-budget--account-wide-risk-control)
 - [Liquidation Guard](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-11-liquidation-guard--native-margin-protection)
 - [Exchange Safety Net (Hyperliquid)](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-12-exchange-safety-net-hyperliquid)
 - [Funding Rate Intelligence](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-13-funding-rate-intelligence-)
 - [Open Interest Guard](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-14-open-interest-guard)
 - [Liquidation Map (Hyperliquid)](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-liquidation-map-experimental-hyperliquid)
 - [Institutional Trend Mode & Confluence Entry Gate](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-15-institutional-trend-mode)
+- [Confluence Flip Exit & Swing Recipe](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-confluence-flip-exit)
 - [Margin, Compound Profits & Win Streak](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-16-futures-margin--compound-profits)
 - [Below-Entry Partials & True Cost Basis](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-below-entry-partial-close-soft-reduction)
 - [Auto-ATR DCA, DCA Multiplier & Scale-In](https://github.com/truitaman/OrderFlow-Magic-Futures/wiki#-18-auto-atr-dca--scale-in)
@@ -285,7 +319,7 @@ Everything is documented in the Wiki:
 
 ---
 ## 🛍️ Get the Strategy
-Requires a valid **Gunbot Defi/Unlimited license** to run on Hyperliquid or dYdX v4.
+Requires a valid **Gunbot Defi/Unlimited license** to run on Hyperliquid, Aster Futures or dYdX v4.
 
 > 🛒 **[Purchase Wick Magic Here](https://www.gunbot.com/devcommunity/wickmagic-futures)**
 
@@ -293,6 +327,6 @@ Requires a valid **Gunbot Defi/Unlimited license** to run on Hyperliquid or dYdX
 https://t.me/+xQtQ9Y4AOc9lZTNk
 
 No Defi license yet?  
-→ Upgrade from Standard — $160: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
-→ Upgrade from Pro — $70: [Purchase here](https://checkout.gunbot.com/crazymop/promoProToDefi)  
-→ New to Gunbot: [gunbot.com](https://checkout.gunbot.com/crazymop/ultimate)
+→ Upgrade from Standard — $300: [Purchase here](https://checkout.gunbot.com/crazymop/promoStandardToDefi)  
+→ Upgrade from Pro — $100: [Purchase here](https://checkout.gunbot.com/crazymop/promoProToDefi)  
+→ New to Gunbot: Grab Unlimited subscription [Purchase here](https://checkout.gunbot.com/crazymop/unlimitedMonthly)
