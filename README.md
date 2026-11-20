@@ -3,7 +3,7 @@
 > **Long. Short. Classic TA. Pure OrderFlow. All in one unified execution engine.**  
 > *Read live market pressure. Trade alongside institutions. On Hyperliquid, dYdX v4, Binance Futures, Kraken Futures and AsterDex.*
 
-**Current version: v1.5.24**
+**Current version: v1.5.25**
 
 ---
 Most bots fail at Futures because they treat it like Spot. **Wick Magic Futures** is engineered from the ground up for derivatives. It understands true bidirectional mechanics, native cross-margin tracking, funding fees, open interest and liquidation risk.
@@ -149,7 +149,7 @@ Each engine can be pointed at the short, long, or daily timeframe. Add the exper
 Everything is transparent. The Gunbot sidebar renders the exact state of your strategy, risk, order book, funding and open interest in real time, grouped in clear sections.
 
 ```text
-🌊 OrderFlow Fut 1.5.24   LONG
+🌊 OrderFlow Fut 1.5.25   LONG
 ── 📊 PERFORMANCE & STATUS ──────────────────
 ROC (annualized)          212.4%
 ⚙️ Mode                   💰 CLOSE
@@ -190,7 +190,7 @@ ROC (annualized)          212.4%
 ```
 
 ---
-## 🔥 What's New in v1.5.24
+## 🔥 What's New in v1.5.25
 
 **🧮 Risk management for the whole account**
 - **Risk Budget** — one shared daily and weekly loss budget for all pairs on the exchange. Entries that do not fit are reduced or blocked, with a new `🧮 Risk Budget` tile.
